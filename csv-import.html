@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>CSV Upload</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+        <style>
+            body {
+                min-height: 100vh;
+                margin: 0;
+                display: grid;
+                place-content: center;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                width: 300px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <input type="file" id="fileInput" accept=".csv" />
+            <button id="uploadBtn">Upload!</button>
+            <p id="statusMessage"></p>
+        </div>
+
+        <script>
+            const uploadBtn = document.getElementById('uploadBtn');
+            const fileInput = document.getElementById('fileInput');
+            const statusMessage = document.getElementById('statusMessage');
+
+            uploadBtn.addEventListener('click', async () => {
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    statusMessage.textContent = "Please select a file first.";
+                    statusMessage.style.color = "red";
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                statusMessage.textContent = "Uploading...";
+                statusMessage.style.color = "inherit";
+
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        statusMessage.textContent = result.message || "Upload successful!";
+                        statusMessage.style.color = "green";
+                    } else {
+                        statusMessage.textContent = result.detail || "Upload failed.";
+                        statusMessage.style.color = "red";
+                    }
+                } catch (error) {
+                    statusMessage.textContent = "Error connecting to backend.";
+                    statusMessage.style.color = "red";
+                    console.error("Upload error:", error);
+                }
+            });
+        </script>
+    </body>
+</html>

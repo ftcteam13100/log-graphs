@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
+    <style>
+        .viewParameters {
+            width: 98vw;
+            height: 98vh;
+        }
+    </style>
+</head>
+
+<body>
+        <div id="data_elem1" class="container-fluid"></div>
+        <script>
+            (function () {
+
+                var xvals = [];
+
+                var plotly_data = [
+                ];
+
+                for(let i=0; i<plotly_data.length; i++)
+                {
+                    for(let j=0; j<xvals.length; j++)
+                    {
+                        plotly_data[i].x.push(xvals[j]);
+                    }
+                }
+
+                var plotly_layout = {
+                    legend:{orientation:"h", x:0, y:1.02, yanchor:"bottom"},
+                    title:{text:"/home/skorada/ftc-csv-grapher/log-graphs/HTML/2026/8/TeleOp_20260801_100500"},
+                    xaxis:{autorange:true,domain:[0.05,0.95],nticks:10,showgrid:true,tickcolor:"#000",tickfont:{size:7},ticklen:5,tickmode:"auto",tickwidth:0.5,type:"category",range:[-1,1]},
+                };
+                var currGraph = document.getElementById("data_elem1");
+                Plotly.newPlot(currGraph, plotly_data, plotly_layout, {
+                    queueLength: 7,
+                    responsive: true
+                });
+
+                currGraph.on('plotly_legendclick', function(data) {
+                   layout = data.layout
+
+                   update_axis = 'yaxis'
+                   if (data.curveNumber != 0) {
+                      update_axis += data.curveNumber + 1;
+                   }
+
+                   shouldNotHideAxis = false;
+                   if (
+                     layout[update_axis].visible !== undefined
+                     && layout[update_axis].visible == false
+                   ) {
+                      shouldNotHideAxis = true;
+                   }
+
+                   layout_updates = {};
+                   layout_updates[update_axis + '.visible'] = shouldNotHideAxis;
+                   Plotly.update(
+                       document.getElementById('data_elem1'),
+                       null, layout_updates
+                   );
+               });
+            })()
+        </script>
+</body>
+</html>
