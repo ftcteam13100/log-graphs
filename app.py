@@ -54,6 +54,7 @@ def generateIndexHtml(baseDir=PATH_BASE):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Graphs</title>
+    <a href="csv-import.html">Import CSV</a>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 2rem; background: #f8f9fa; color: #333; }
         h1 { color: #2c3e50; border-bottom: 2px solid #ccc; padding-bottom: 0.5rem; }
