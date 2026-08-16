@@ -67,7 +67,9 @@ def generateIndexHtml(baseDir=PATH_BASE):
 </head>
 <body>
     <h1>Log Graphs</h1>
-    <a href="csv-import.html">Import CSV</a>
+    <a href="csv-import.html">
+        Import CSV
+    </a>
 """
 
     for fileDate in sortedDates:
