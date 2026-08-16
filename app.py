@@ -48,7 +48,8 @@ def generateIndexHtml(baseDir=PATH_BASE):
 
     sortedDates = sorted(groupedFiles.keys(), reverse=True)
 
-    htmlContent = """<!DOCTYPE html>
+    htmlContent = """
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
