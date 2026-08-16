@@ -18,7 +18,7 @@ app.add_middleware(
 
 year = datetime.now().year
 month = datetime.now().month
-timestamp = datetime.now().strftime("%m/%d/%y|%H:%M:%S")
+timestamp = datetime.now().strftime("%m/%d/%y %H:%M:%S")
 
 PATH_GRAPHING_SCRIPT = "plotData.pl"
 PATH_CSV_FOLDER = f"/home/skorada/ftc-csv-grapher/log-graphs/CSV/{year}/{month}"
@@ -39,10 +39,11 @@ def upload_and_sync(file: UploadFile = File(...)):
         with open(path_fileLocationCSV, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        with open(path_fileLocationHTML, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        shutil.copyfile(path_fileLocationCSV, path_fileLocationHTML)
 
         subprocess.run(["perl", PATH_GRAPHING_SCRIPT, path_fileLocationHTML], check=True)
+        
+        if (os.path.exists(path_fileLocationHTML)): os.remove(path_fileLocationHTML)
 
         path_homeHTML = os.path.splitext(file.filename)[0] + ".html"
 
