@@ -69,6 +69,7 @@ def generateIndexHtml(baseDir=PATH_BASE):
     <h1>Log Graphs</h1>
     <a href="csv-import.html">
         Import CSV
+        <br>
     </a>
 """
 
