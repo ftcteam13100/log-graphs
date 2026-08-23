@@ -25,6 +25,16 @@ my $numColors = scalar @colors;
 my @sides = ("right", "left");
 my $numSides = scalar @sides;
 
+my %range = (
+  "X" => [0, 144],
+  "Y" => [0, 144],
+  "ProjectedX" => [0, 144],
+  "ProjectedY" => [0, 144],
+  "shooterTarget" => [0, 2200],
+  "shooterVelocity" => [0, 2200],
+  "shooterAdjust" => [0, 2200],
+);
+
 sub timestamp2Num
 {
     my $ts = $_[0];
@@ -189,10 +199,10 @@ BEGIN_HTML
 
             if($yAxisType[$idx])
             {
-	        if($yAxisNames[$idx] =~ /shooterTarget/ || $yAxisNames[$idx] =~ /shooterVelocity/ ||$yAxisNames[$idx] =~ /shooterAdjust/)
+                if(defined $range{$yAxisNames[$idx]})
 		{
-                    $yAxisDataMin[$idx] = 0;
-                    $yAxisDataMax[$idx] = 2200;
+                    $yAxisDataMin[$idx] = $range{$yAxisNames[$idx]}[0];
+                    $yAxisDataMax[$idx] = $range{$yAxisNames[$idx]}[1];
 		    $yAxisType[$idx] = 2;
 		}
 		else
@@ -337,7 +347,7 @@ if($#ARGV < 0 || $ARGV[0] eq "-h")
 my $inputFile = pop @ARGV;
 my $outputFile = $inputFile;
 $outputFile =~ s/\.csv$//;
-$outputFile =~ s/\/CSV\//\/HTML\//;
+$outputFile =~ s/CSV\//HTML\//;
 
 while($ARGV[0] =~ /^-([senu]):*(.*)/)
 {
