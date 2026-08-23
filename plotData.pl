@@ -33,6 +33,8 @@ my %range = (
   "shooterTarget" => [0, 2200],
   "shooterVelocity" => [0, 2200],
   "shooterAdjust" => [0, 2200],
+  "TurretTarget" => [0, 360],
+  "TurretActual" => [0, 360],
 );
 
 sub timestamp2Num
