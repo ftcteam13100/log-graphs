@@ -85,15 +85,12 @@ def upload_and_sync(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Invalid file type")
 
-    # Compute the timestamp fresh for THIS request, not once at server startup.
     now = datetime.now()
     year = now.year
     month = now.month
     timestamp = now.strftime("%m/%d/%y %H:%M:%S")
 
-    # Autoname the output based on the timestamp instead of reusing the
-    # uploaded filename (e.g. "logging-test.csv" -> "20260905_231045.csv").
-    autoName = now.strftime("%Y%m%d_%H%M%S") + ".csv"
+    autoName = now.strftime("TeleOp_%Y%m%d_%H%M%S") + ".csv"
 
     csvFolder = f"{PATH_BASE}/CSV/{year}/{month}"
     htmlFolder = f"{PATH_BASE}/HTML/{year}/{month}"
