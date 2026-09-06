@@ -16,17 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-year = datetime.now().year
-month = datetime.now().month
-timestamp = datetime.now().strftime("%m/%d/%y %H:%M:%S")
-
 PATH_BASE = "/home/skorada/ftc-csv-grapher/log-graphs"
 PATH_GRAPHING_SCRIPT = "plotData.pl"
-PATH_CSV_FOLDER = f"/home/skorada/ftc-csv-grapher/log-graphs/CSV/{year}/{month}"
-PATH_HTML_FOLDER = f"/home/skorada/ftc-csv-grapher/log-graphs/HTML/{year}/{month}"
-
-os.makedirs(PATH_CSV_FOLDER, exist_ok=True)
-os.makedirs(PATH_HTML_FOLDER, exist_ok=True)
 
 def generateIndexHtml(baseDir=PATH_BASE):
     htmlFiles = glob(os.path.join(baseDir, "HTML/**/*.html"), recursive=True)
@@ -94,8 +85,23 @@ def upload_and_sync(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Invalid file type")
 
-    path_fileLocationCSV = os.path.join(PATH_CSV_FOLDER, file.filename)
-    path_fileLocationHTML = os.path.join(PATH_HTML_FOLDER, file.filename)
+    # Compute the timestamp fresh for THIS request, not once at server startup.
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    timestamp = now.strftime("%m/%d/%y %H:%M:%S")
+
+    # Autoname the output based on the timestamp instead of reusing the
+    # uploaded filename (e.g. "logging-test.csv" -> "20260905_231045.csv").
+    autoName = now.strftime("%Y%m%d_%H%M%S") + ".csv"
+
+    csvFolder = f"{PATH_BASE}/CSV/{year}/{month}"
+    htmlFolder = f"{PATH_BASE}/HTML/{year}/{month}"
+    os.makedirs(csvFolder, exist_ok=True)
+    os.makedirs(htmlFolder, exist_ok=True)
+
+    path_fileLocationCSV = os.path.join(csvFolder, autoName)
+    path_fileLocationHTML = os.path.join(htmlFolder, autoName)
 
     try:
         with open(path_fileLocationCSV, "wb") as buffer:
@@ -104,7 +110,7 @@ def upload_and_sync(file: UploadFile = File(...)):
         shutil.copyfile(path_fileLocationCSV, path_fileLocationHTML)
 
         subprocess.run(["perl", PATH_GRAPHING_SCRIPT, path_fileLocationHTML], check=True)
-        
+
         if (os.path.exists(path_fileLocationHTML)): os.remove(path_fileLocationHTML)
 
         generateIndexHtml()
@@ -116,17 +122,17 @@ def upload_and_sync(file: UploadFile = File(...)):
 
         return {
             "status": "success",
-            "message": f"'{file.filename}' graph successfully pushed",
+            "message": f"'{file.filename}' graph successfully pushed as '{autoName}'",
             "saved_path": path_fileLocationHTML
         }
 
     except subprocess.CalledProcessError as e:
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Process failed during execution: {e}"
         )
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Error: {str(e)}"
         )
