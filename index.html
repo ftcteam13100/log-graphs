@@ -16,19 +16,66 @@
         a:hover { text-decoration: underline; }
         .comment { color: #666; font-size: 0.9rem; margin-left: 0.5rem; }
         .comment::before { content: "\2014\00a0"; }
-        .uploadForm { display: flex; flex-direction: column; gap: 0.75rem; max-width: 400px; }
-        .uploadForm input, .uploadForm button { font: inherit; padding: 0.5rem; }
-        #statusMessage { margin: 0; min-height: 1.2em; }
+
+        /* ---- Import CSV card ---- */
+        .uploadCard { padding: 0; overflow: hidden; max-width: 460px; box-shadow: 0 4px 14px rgba(0,102,204,0.12); }
+        .uploadHeader { display: flex; align-items: center; gap: 0.9rem; padding: 1.1rem 1.5rem; background: linear-gradient(135deg, #0057b8, #4a90e2); color: white; }
+        .uploadIcon { width: 42px; height: 42px; flex-shrink: 0; padding: 9px; box-sizing: border-box; border-radius: 10px; background: rgba(255,255,255,0.18); }
+        .card .uploadHeader h2 { margin: 0; color: white; font-size: 1.3rem; }
+        .uploadHeader p { margin: 0.15rem 0 0; font-size: 0.85rem; opacity: 0.85; }
+        .uploadBody { display: flex; flex-direction: column; gap: 0.9rem; padding: 1.25rem 1.5rem 1.5rem; }
+
+        .dropZone { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 1.6rem 1rem; border: 2px dashed #b9c7d8; border-radius: 10px; background: #f5f8fc; color: #5a6b7d; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+        .dropZone:hover, .dropZone.dragOver { border-color: #0066cc; background: #eaf3ff; }
+        .dropZone.hasFile { border-style: solid; border-color: #2f9e63; background: #eefaf3; color: #1f6e44; }
+        .dropZone strong { font-size: 0.95rem; word-break: break-all; }
+        .dropZone span { font-size: 0.8rem; opacity: 0.8; }
+        .dropZone svg { width: 28px; height: 28px; }
+        #fileInput { display: none; }
+
+        .field { display: flex; flex-direction: column; gap: 0.3rem; }
+        .field label { font-size: 0.8rem; font-weight: 600; color: #4a5a6a; text-transform: uppercase; letter-spacing: 0.04em; }
+        #commentInput { font: inherit; padding: 0.65rem 0.8rem; border: 1px solid #ccd5e0; border-radius: 8px; background: white; transition: border-color 0.15s, box-shadow 0.15s; }
+        #commentInput:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.15); }
+
+        #uploadBtn { font: inherit; font-weight: 600; padding: 0.7rem 1rem; border: none; border-radius: 8px; color: white; background: linear-gradient(135deg, #0057b8, #4a90e2); cursor: pointer; transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s; }
+        #uploadBtn:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(0,102,204,0.35); transform: translateY(-1px); }
+        #uploadBtn:disabled { opacity: 0.6; cursor: wait; }
+        #statusMessage { margin: 0; min-height: 1.2em; font-size: 0.9rem; }
     </style>
 </head>
 <body>
     <h1>Log Graphs</h1>
 
-    <div class="card">
-        <h2>Import CSV</h2>
-        <div class="uploadForm">
+    <div class="card uploadCard">
+        <div class="uploadHeader">
+            <svg class="uploadIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <div>
+                <h2>Import CSV</h2>
+                <p>Upload a log to generate a new graph</p>
+            </div>
+        </div>
+
+        <div class="uploadBody">
+            <label class="dropZone" id="dropZone" for="fileInput">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <strong id="dropTitle">Choose a CSV file</strong>
+                <span id="dropHint">or drag and drop it here</span>
+            </label>
             <input type="file" id="fileInput" accept=".csv" />
-            <input type="text" id="commentInput" placeholder="Comment (optional)" maxlength="500" />
+
+            <div class="field">
+                <label for="commentInput">Comment</label>
+                <input type="text" id="commentInput" placeholder="Optional note about this run" maxlength="500" />
+            </div>
+
             <button id="uploadBtn">Upload</button>
             <p id="statusMessage"></p>
         </div>
@@ -39,6 +86,43 @@
         const fileInput = document.getElementById('fileInput');
         const commentInput = document.getElementById('commentInput');
         const statusMessage = document.getElementById('statusMessage');
+        const dropZone = document.getElementById('dropZone');
+        const dropTitle = document.getElementById('dropTitle');
+        const dropHint = document.getElementById('dropHint');
+
+        function updateDropZone() {
+            const file = fileInput.files[0];
+            if (file) {
+                dropZone.classList.add('hasFile');
+                dropTitle.textContent = file.name;
+                dropHint.textContent = (file.size / 1024).toFixed(1) + ' KB • click to change';
+            } else {
+                dropZone.classList.remove('hasFile');
+                dropTitle.textContent = 'Choose a CSV file';
+                dropHint.textContent = 'or drag and drop it here';
+            }
+        }
+
+        fileInput.addEventListener('change', updateDropZone);
+
+        ['dragenter', 'dragover'].forEach(evt => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragOver');
+            });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragOver');
+            });
+        });
+        dropZone.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateDropZone();
+            }
+        });
 
         uploadBtn.addEventListener('click', async () => {
             const file = fileInput.files[0];
@@ -70,6 +154,7 @@
                     statusMessage.style.color = "green";
                     fileInput.value = "";
                     commentInput.value = "";
+                    updateDropZone();
                 } else {
                     statusMessage.textContent = result.detail || "Upload failed.";
                     statusMessage.style.color = "red";
@@ -86,6 +171,7 @@
     <div class="card">
         <h2>2026-10-04</h2>
         <ul>
+            <li><a href="HTML/2026/10/TeleOp_20261004_104115.html">TeleOp_20261004_104115.html</a><span class="comment">&nbsp;</span></li>
             <li><a href="HTML/2026/10/TeleOp_20261004_103803.html">TeleOp_20261004_103803.html</a><span class="comment">&nbsp;</span></li>
             <li><a href="HTML/2026/10/TeleOp_20261004_103610.html">TeleOp_20261004_103610.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
