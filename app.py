@@ -28,12 +28,17 @@ LEGACY_COMMENT = "<Legacy>"
 MAX_COMMENT_LENGTH = 500
 
 commentsLock = threading.Lock()
-# Serializes upload/delete so two requests never fight over files or git
+# Serializes upload/delete/edit so two requests never fight over files or git
 operationLock = threading.Lock()
 
 
 class DeleteRequest(BaseModel):
     path: str
+
+
+class CommentRequest(BaseModel):
+    path: str
+    comment: str = ""
 
 
 def stemOf(fileName):
@@ -108,7 +113,8 @@ def generateIndexHtml(baseDir=PATH_BASE):
         key = stemOf(fileName)
 
         # Anything without a stored comment predates comments -> Legacy
-        comment = comments.get(key, LEGACY_COMMENT)
+        isLegacy = key not in comments
+        comment = LEGACY_COMMENT if isLegacy else comments[key]
 
         if fileDate not in groupedFiles:
             groupedFiles[fileDate] = []
@@ -116,7 +122,8 @@ def generateIndexHtml(baseDir=PATH_BASE):
             "fileName": fileName,
             "relativePath": relativePath,
             "stamp": stamp,
-            "comment": comment
+            "comment": comment,
+            "isLegacy": isLegacy
         })
 
     sortedDates = sorted(groupedFiles.keys(), reverse=True)
@@ -144,7 +151,13 @@ def generateIndexHtml(baseDir=PATH_BASE):
         .fileName { margin-top: 0.1rem; font-size: 0.75rem; font-style: italic; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         li a { color: inherit; text-decoration: none; font-weight: 500; }
         li a:hover { text-decoration: underline; }
-        .comment { color: #777; font-size: 0.9rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .comment { max-width: 45%; padding: 0.2rem 0.4rem; border-radius: 6px; color: #777; font-size: 0.9rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: text; }
+        .comment:hover { background: #f4f4f4; }
+        .comment:empty::before { content: "Add comment"; color: #bbb; }
+        .comment.editing { padding: 0; background: none; max-width: none; overflow: visible; }
+        .commentEdit { width: 14rem; font: inherit; font-size: 0.9rem; padding: 0.3rem 0.5rem; border: 1px solid #111; border-radius: 6px; outline: none; background: #fff; color: #111; }
+
         .del { font: inherit; font-size: 0.8rem; padding: 0.25rem 0.4rem; border: none; background: none; color: #999; cursor: pointer; }
         .del:hover:not(:disabled) { color: #111; text-decoration: underline; }
         .del:disabled { cursor: wait; }
@@ -164,6 +177,7 @@ def generateIndexHtml(baseDir=PATH_BASE):
         @media (max-width: 800px) {
             .layout { grid-template-columns: 1fr; gap: 2rem; padding: 1.5rem 1rem; }
             aside { position: static; order: -1; }
+            .commentEdit { width: 10rem; }
         }
     </style>
 </head>
@@ -180,12 +194,13 @@ def generateIndexHtml(baseDir=PATH_BASE):
             safeName = html.escape(item["fileName"])
             safePath = html.escape(item["relativePath"], quote=True)
             safeComment = html.escape(item["comment"])
+            legacyAttr = ' data-legacy="1"' if item["isLegacy"] else ""
             label = item["stamp"].strftime("%I:%M:%S %p").lstrip("0")
             htmlContent += (
                 f'            <li>\n'
                 f'                <div class="entry"><a href="{safePath}">{label}</a>'
                 f'<em class="fileName">{safeName}</em></div>\n'
-                f'                <span class="comment">{safeComment}</span>\n'
+                f'                <span class="comment" title="Click to edit"{legacyAttr}>{safeComment}</span>\n'
                 f'                <button class="del" data-path="{safePath}">Delete</button>\n'
                 f'            </li>\n'
             )
@@ -204,6 +219,7 @@ def generateIndexHtml(baseDir=PATH_BASE):
 
 <script>
     const API = 'http://192.168.1.70:8000';
+    const LEGACY = '<Legacy>';
 
     const uploadBtn = document.getElementById('uploadBtn');
     const fileInput = document.getElementById('fileInput');
@@ -248,6 +264,7 @@ def generateIndexHtml(baseDir=PATH_BASE):
         }
     });
 
+    // ---- Delete ----
     document.querySelector('main').addEventListener('click', async (e) => {
         const btn = e.target.closest('.del');
         if (!btn) return;
@@ -286,6 +303,86 @@ def generateIndexHtml(baseDir=PATH_BASE):
             btn.textContent = 'Delete';
         }
     });
+
+    // ---- Edit comment ----
+    document.querySelector('main').addEventListener('click', (e) => {
+        const span = e.target.closest('.comment');
+        if (!span || span.classList.contains('editing')) return;
+        startEdit(span);
+    });
+
+    function startEdit(span) {
+        const wasLegacy = span.dataset.legacy === '1';
+        const original = wasLegacy ? '' : span.textContent;
+        const path = span.closest('li').querySelector('.del').dataset.path;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'commentEdit';
+        input.maxLength = 500;
+        input.value = original;
+        input.placeholder = 'Comment';
+
+        span.textContent = '';
+        span.classList.add('editing');
+        span.appendChild(input);
+        input.focus();
+        input.select();
+
+        let finished = false;
+
+        function restore() {
+            span.classList.remove('editing');
+            span.textContent = wasLegacy ? LEGACY : original;
+        }
+
+        async function finish(save) {
+            if (finished) return;
+            finished = true;
+
+            const value = input.value.trim();
+
+            if (!save || value === original) {
+                restore();
+                return;
+            }
+
+            span.classList.remove('editing');
+            span.textContent = value;
+            span.style.opacity = '0.5';
+            statusMessage.textContent = 'Saving comment...';
+
+            try {
+                const response = await fetch(API + '/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path, comment: value })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    delete span.dataset.legacy;
+                    statusMessage.textContent = result.message || 'Comment saved.';
+                } else {
+                    restore();
+                    statusMessage.textContent = result.detail || 'Saving comment failed.';
+                }
+            } catch (error) {
+                restore();
+                statusMessage.textContent = 'Error connecting to backend.';
+                console.error('Comment error:', error);
+            } finally {
+                span.style.opacity = '';
+            }
+        }
+
+        input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') { ev.preventDefault(); finish(true); }
+            else if (ev.key === 'Escape') { ev.preventDefault(); finish(false); }
+        });
+        input.addEventListener('blur', () => finish(true));
+    }
 </script>
 </body>
 </html>"""
@@ -293,6 +390,17 @@ def generateIndexHtml(baseDir=PATH_BASE):
     indexPath = os.path.join(baseDir, "index.html")
     with open(indexPath, "w", encoding="utf-8") as htmlFile:
         htmlFile.write(htmlContent)
+
+
+def commitAndPush(message):
+    """Stage everything, commit if anything changed, then push."""
+    subprocess.run(["git", "add", "-A"], check=True)
+    status = subprocess.run(
+        ["git", "status", "--porcelain"], check=True, capture_output=True, text=True
+    )
+    if status.stdout.strip():
+        subprocess.run(["git", "commit", "-m", message], check=True)
+    subprocess.run(["git", "push"], check=True)
 
 
 @app.post("/upload")
@@ -333,10 +441,7 @@ def upload_and_sync(file: UploadFile = File(...), comment: str = Form("")):
 
             generateIndexHtml()
 
-            commitMessage = f"New files {timestamp} (Automated)"
-            subprocess.run(["git", "add", "."], check=True)
-            subprocess.run(["git", "commit", "-m", commitMessage], check=True)
-            subprocess.run(["git", "push"], check=True)
+            commitAndPush(f"New files {timestamp} (Automated)")
 
         return {
             "status": "success",
@@ -380,14 +485,44 @@ def delete_graph(request: DeleteRequest):
 
             generateIndexHtml()
 
-            commitMessage = f"Deleted {stem} {timestamp} (Automated)"
-            subprocess.run(["git", "add", "-A"], check=True)
-            subprocess.run(["git", "commit", "-m", commitMessage], check=True)
-            subprocess.run(["git", "push"], check=True)
+            commitAndPush(f"Deleted {stem} {timestamp} (Automated)")
 
         return {
             "status": "success",
             "message": f"Deleted '{fileName}'"
+        }
+
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Process failed during execution: {e}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error: {str(e)}"
+        )
+
+
+@app.post("/comment")
+def edit_comment(request: CommentRequest):
+    _, graphPath = resolveGraphPath(request.path)
+
+    stem = stemOf(os.path.basename(graphPath))
+    comment = request.comment.strip()[:MAX_COMMENT_LENGTH]
+    timestamp = datetime.now().strftime("%m/%d/%y %H:%M:%S")
+
+    try:
+        with operationLock:
+            saveComment(stem, comment)
+
+            generateIndexHtml()
+
+            commitAndPush(f"Edited comment on {stem} {timestamp} (Automated)")
+
+        return {
+            "status": "success",
+            "message": "Comment saved."
         }
 
     except subprocess.CalledProcessError as e:

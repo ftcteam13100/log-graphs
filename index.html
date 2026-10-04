@@ -21,7 +21,13 @@
         .fileName { margin-top: 0.1rem; font-size: 0.75rem; font-style: italic; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         li a { color: inherit; text-decoration: none; font-weight: 500; }
         li a:hover { text-decoration: underline; }
-        .comment { color: #777; font-size: 0.9rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .comment { max-width: 45%; padding: 0.2rem 0.4rem; border-radius: 6px; color: #777; font-size: 0.9rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: text; }
+        .comment:hover { background: #f4f4f4; }
+        .comment:empty::before { content: "Add comment"; color: #bbb; }
+        .comment.editing { padding: 0; background: none; max-width: none; overflow: visible; }
+        .commentEdit { width: 14rem; font: inherit; font-size: 0.9rem; padding: 0.3rem 0.5rem; border: 1px solid #111; border-radius: 6px; outline: none; background: #fff; color: #111; }
+
         .del { font: inherit; font-size: 0.8rem; padding: 0.25rem 0.4rem; border: none; background: none; color: #999; cursor: pointer; }
         .del:hover:not(:disabled) { color: #111; text-decoration: underline; }
         .del:disabled { cursor: wait; }
@@ -41,6 +47,7 @@
         @media (max-width: 800px) {
             .layout { grid-template-columns: 1fr; gap: 2rem; padding: 1.5rem 1rem; }
             aside { position: static; order: -1; }
+            .commentEdit { width: 10rem; }
         }
     </style>
 </head>
@@ -53,12 +60,12 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260927_130102.html">1:01:02 PM</a><em class="fileName">TeleOp_20260927_130102.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit">Turret Only</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260927_130102.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260927_125817.html">12:58:17 PM</a><em class="fileName">TeleOp_20260927_125817.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260927_125817.html">Delete</button>
             </li>
         </ul>
@@ -68,37 +75,37 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_124320.html">12:43:20 PM</a><em class="fileName">TeleOp_20260920_124320.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_124320.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_124124.html">12:41:24 PM</a><em class="fileName">TeleOp_20260920_124124.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_124124.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_123458.html">12:34:58 PM</a><em class="fileName">TeleOp_20260920_123458.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_123458.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_123310.html">12:33:10 PM</a><em class="fileName">TeleOp_20260920_123310.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_123310.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_121244.html">12:12:44 PM</a><em class="fileName">TeleOp_20260920_121244.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_121244.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_120807.html">12:08:07 PM</a><em class="fileName">TeleOp_20260920_120807.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_120807.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260920_113954.html">11:39:54 AM</a><em class="fileName">TeleOp_20260920_113954.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260920_113954.html">Delete</button>
             </li>
         </ul>
@@ -108,7 +115,7 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260919_125219.html">12:52:19 PM</a><em class="fileName">TeleOp_20260919_125219.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260919_125219.html">Delete</button>
             </li>
         </ul>
@@ -118,12 +125,12 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260907_123927.html">12:39:27 PM</a><em class="fileName">TeleOp_20260907_123927.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260907_123927.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260907_102948.html">10:29:48 AM</a><em class="fileName">TeleOp_20260907_102948.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260907_102948.html">Delete</button>
             </li>
         </ul>
@@ -133,32 +140,32 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260906_124514.html">12:45:14 PM</a><em class="fileName">TeleOp_20260906_124514.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260906_124514.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260906_124033.html">12:40:33 PM</a><em class="fileName">TeleOp_20260906_124033.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260906_124033.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260906_121909.html">12:19:09 PM</a><em class="fileName">TeleOp_20260906_121909.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260906_121909.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260906_105906.html">10:59:06 AM</a><em class="fileName">TeleOp_20260906_105906.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260906_105906.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260906_104049.html">10:40:49 AM</a><em class="fileName">TeleOp_20260906_104049.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260906_104049.html">Delete</button>
             </li>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260906_095726.html">9:57:26 AM</a><em class="fileName">TeleOp_20260906_095726.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260906_095726.html">Delete</button>
             </li>
         </ul>
@@ -168,7 +175,7 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/9/TeleOp_20260905_204855.html">8:48:55 PM</a><em class="fileName">TeleOp_20260905_204855.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/9/TeleOp_20260905_204855.html">Delete</button>
             </li>
         </ul>
@@ -178,7 +185,7 @@
         <ul>
             <li>
                 <div class="entry"><a href="HTML/2026/8/TeleOp_20260801_100500.html">10:05:00 AM</a><em class="fileName">TeleOp_20260801_100500.html</em></div>
-                <span class="comment">&lt;Legacy&gt;</span>
+                <span class="comment" title="Click to edit" data-legacy="1">&lt;Legacy&gt;</span>
                 <button class="del" data-path="HTML/2026/8/TeleOp_20260801_100500.html">Delete</button>
             </li>
         </ul>
@@ -196,6 +203,7 @@
 
 <script>
     const API = 'http://192.168.1.70:8000';
+    const LEGACY = '<Legacy>';
 
     const uploadBtn = document.getElementById('uploadBtn');
     const fileInput = document.getElementById('fileInput');
@@ -240,6 +248,7 @@
         }
     });
 
+    // ---- Delete ----
     document.querySelector('main').addEventListener('click', async (e) => {
         const btn = e.target.closest('.del');
         if (!btn) return;
@@ -278,6 +287,86 @@
             btn.textContent = 'Delete';
         }
     });
+
+    // ---- Edit comment ----
+    document.querySelector('main').addEventListener('click', (e) => {
+        const span = e.target.closest('.comment');
+        if (!span || span.classList.contains('editing')) return;
+        startEdit(span);
+    });
+
+    function startEdit(span) {
+        const wasLegacy = span.dataset.legacy === '1';
+        const original = wasLegacy ? '' : span.textContent;
+        const path = span.closest('li').querySelector('.del').dataset.path;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'commentEdit';
+        input.maxLength = 500;
+        input.value = original;
+        input.placeholder = 'Comment';
+
+        span.textContent = '';
+        span.classList.add('editing');
+        span.appendChild(input);
+        input.focus();
+        input.select();
+
+        let finished = false;
+
+        function restore() {
+            span.classList.remove('editing');
+            span.textContent = wasLegacy ? LEGACY : original;
+        }
+
+        async function finish(save) {
+            if (finished) return;
+            finished = true;
+
+            const value = input.value.trim();
+
+            if (!save || value === original) {
+                restore();
+                return;
+            }
+
+            span.classList.remove('editing');
+            span.textContent = value;
+            span.style.opacity = '0.5';
+            statusMessage.textContent = 'Saving comment...';
+
+            try {
+                const response = await fetch(API + '/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path, comment: value })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    delete span.dataset.legacy;
+                    statusMessage.textContent = result.message || 'Comment saved.';
+                } else {
+                    restore();
+                    statusMessage.textContent = result.detail || 'Saving comment failed.';
+                }
+            } catch (error) {
+                restore();
+                statusMessage.textContent = 'Error connecting to backend.';
+                console.error('Comment error:', error);
+            } finally {
+                span.style.opacity = '';
+            }
+        }
+
+        input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') { ev.preventDefault(); finish(true); }
+            else if (ev.key === 'Escape') { ev.preventDefault(); finish(false); }
+        });
+        input.addEventListener('blur', () => finish(true));
+    }
 </script>
 </body>
 </html>
