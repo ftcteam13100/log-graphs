@@ -8,80 +8,141 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 2rem; background: #f8f9fa; color: #333; }
         h1 { color: #2c3e50; border-bottom: 2px solid #ccc; padding-bottom: 0.5rem; }
-        .dateGroup { margin-bottom: 2rem; background: white; padding: 1.2rem 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .dateGroup h2 { margin-top: 0; color: #0066cc; font-size: 1.25rem; }
+        .card { margin-bottom: 2rem; background: white; padding: 1.2rem 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card h2 { margin-top: 0; color: #0066cc; font-size: 1.25rem; }
         ul { list-style-type: none; padding-left: 0; margin: 0; }
         li { margin: 0.5rem 0; }
         a { color: #2b6cb0; text-decoration: none; font-weight: 500; }
         a:hover { text-decoration: underline; }
+        .comment { color: #666; font-size: 0.9rem; margin-left: 0.5rem; }
+        .comment::before { content: "\2014\00a0"; }
+        .uploadForm { display: flex; flex-direction: column; gap: 0.75rem; max-width: 400px; }
+        .uploadForm input, .uploadForm button { font: inherit; padding: 0.5rem; }
+        #statusMessage { margin: 0; min-height: 1.2em; }
     </style>
 </head>
 <body>
     <h1>Log Graphs</h1>
-    <a href="csv-import.html">
-        Import CSV
-        <br>
-        <br>
-    </a>
-    <div class="dateGroup">
+
+    <div class="card">
+        <h2>Import CSV</h2>
+        <div class="uploadForm">
+            <input type="file" id="fileInput" accept=".csv" />
+            <input type="text" id="commentInput" placeholder="Comment (optional)" maxlength="500" />
+            <button id="uploadBtn">Upload</button>
+            <p id="statusMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const commentInput = document.getElementById('commentInput');
+        const statusMessage = document.getElementById('statusMessage');
+
+        uploadBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+
+            if (!file) {
+                statusMessage.textContent = "Please select a file first.";
+                statusMessage.style.color = "red";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('comment', commentInput.value.trim());
+
+            statusMessage.textContent = "Uploading...";
+            statusMessage.style.color = "inherit";
+            uploadBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://192.168.1.70:8000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusMessage.textContent = result.message || "Upload successful!";
+                    statusMessage.style.color = "green";
+                    fileInput.value = "";
+                    commentInput.value = "";
+                } else {
+                    statusMessage.textContent = result.detail || "Upload failed.";
+                    statusMessage.style.color = "red";
+                }
+            } catch (error) {
+                statusMessage.textContent = "Error connecting to backend.";
+                statusMessage.style.color = "red";
+                console.error("Upload error:", error);
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        });
+    </script>
+    <div class="card">
         <h2>2026-10-04</h2>
         <ul>
-            <li><a href="HTML/2026/10/TeleOp_20261004_103610.html">TeleOp_20261004_103610.html</a></li>
+            <li><a href="HTML/2026/10/TeleOp_20261004_103803.html">TeleOp_20261004_103803.html</a><span class="comment">&nbsp;</span></li>
+            <li><a href="HTML/2026/10/TeleOp_20261004_103610.html">TeleOp_20261004_103610.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-09-27</h2>
         <ul>
-            <li><a href="HTML/2026/9/TeleOp_20260927_130102.html">TeleOp_20260927_130102.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260927_125817.html">TeleOp_20260927_125817.html</a></li>
+            <li><a href="HTML/2026/9/TeleOp_20260927_130102.html">TeleOp_20260927_130102.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260927_125817.html">TeleOp_20260927_125817.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-09-20</h2>
         <ul>
-            <li><a href="HTML/2026/9/TeleOp_20260920_124320.html">TeleOp_20260920_124320.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260920_124124.html">TeleOp_20260920_124124.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260920_123458.html">TeleOp_20260920_123458.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260920_123310.html">TeleOp_20260920_123310.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260920_121244.html">TeleOp_20260920_121244.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260920_120807.html">TeleOp_20260920_120807.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260920_113954.html">TeleOp_20260920_113954.html</a></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_124320.html">TeleOp_20260920_124320.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_124124.html">TeleOp_20260920_124124.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_123458.html">TeleOp_20260920_123458.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_123310.html">TeleOp_20260920_123310.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_121244.html">TeleOp_20260920_121244.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_120807.html">TeleOp_20260920_120807.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260920_113954.html">TeleOp_20260920_113954.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-09-19</h2>
         <ul>
-            <li><a href="HTML/2026/9/TeleOp_20260919_125219.html">TeleOp_20260919_125219.html</a></li>
+            <li><a href="HTML/2026/9/TeleOp_20260919_125219.html">TeleOp_20260919_125219.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-09-07</h2>
         <ul>
-            <li><a href="HTML/2026/9/TeleOp_20260907_123927.html">TeleOp_20260907_123927.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260907_102948.html">TeleOp_20260907_102948.html</a></li>
+            <li><a href="HTML/2026/9/TeleOp_20260907_123927.html">TeleOp_20260907_123927.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260907_102948.html">TeleOp_20260907_102948.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-09-06</h2>
         <ul>
-            <li><a href="HTML/2026/9/TeleOp_20260906_124514.html">TeleOp_20260906_124514.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260906_124033.html">TeleOp_20260906_124033.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260906_121909.html">TeleOp_20260906_121909.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260906_105906.html">TeleOp_20260906_105906.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260906_104049.html">TeleOp_20260906_104049.html</a></li>
-            <li><a href="HTML/2026/9/TeleOp_20260906_095726.html">TeleOp_20260906_095726.html</a></li>
+            <li><a href="HTML/2026/9/TeleOp_20260906_124514.html">TeleOp_20260906_124514.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260906_124033.html">TeleOp_20260906_124033.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260906_121909.html">TeleOp_20260906_121909.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260906_105906.html">TeleOp_20260906_105906.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260906_104049.html">TeleOp_20260906_104049.html</a><span class="comment">&lt;Legacy&gt;</span></li>
+            <li><a href="HTML/2026/9/TeleOp_20260906_095726.html">TeleOp_20260906_095726.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-09-05</h2>
         <ul>
-            <li><a href="HTML/2026/9/TeleOp_20260905_204855.html">TeleOp_20260905_204855.html</a></li>
+            <li><a href="HTML/2026/9/TeleOp_20260905_204855.html">TeleOp_20260905_204855.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
-    <div class="dateGroup">
+    <div class="card">
         <h2>2026-08-15</h2>
         <ul>
-            <li><a href="HTML/2026/8/TeleOp_20260801_100500.html">TeleOp_20260801_100500.html</a></li>
+            <li><a href="HTML/2026/8/TeleOp_20260801_100500.html">TeleOp_20260801_100500.html</a><span class="comment">&lt;Legacy&gt;</span></li>
         </ul>
     </div>
 </body>
